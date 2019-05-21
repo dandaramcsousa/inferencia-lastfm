@@ -42,7 +42,7 @@ glimpse(lastfm)
 Utilizaremos ICs para estimar duas métricas sobre os usuários do LastFM em geral durante um período de 6 meses. Em ambos os casos faremos isso a partir de uma amostra de 300 usuários. As duas métricas são: 
 
 1. Qual a proporção de novos artistas em geral escutada por usuários?
-2. Para os usuários que gostam de música muito pop (mediana_pop > 5), qual a correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos. 
+2. Para os usuários que gostam de música muito pop (mediana_pop > 5), qual a correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos? 
 
 Crie intervalos com 95% de confiança.
 
@@ -85,13 +85,48 @@ ci %>%
     )) +
     geom_pointrange() +
     geom_point(size = 3) + 
-    labs(x = "Novos", 
-         y = "Proporção de novos artistas")
+    labs(title = "Proporção de novos artistas")
 ```
 
 ### Usuários que gostam muito de música pop
 
 ```{r}
+lastfm %>%
+    ggplot(aes(mediana_pop)) +
+    geom_histogram()
+```
 
+```{r}
+theta_pop <- function(df,i) {
+    df <- df %>%
+        slice(i) %>%
+        filter(mediana_pop > 5) %>%
+        mutate(prop_pop = news/(news + old))
+    cor(df$mediana_pop, df$prop_pop)
+}
+
+booted_pop <- boot(data = lastfm, 
+               statistic = theta_pop, 
+               R = 2000)
+
+ci_pop = tidy(booted_pop, 
+          conf.level = .95,
+          conf.method = "bca",
+          conf.int = TRUE)
+
+glimpse(ci_pop)
+```
+
+```{r}
+ci_pop %>%
+    ggplot(aes(
+        x = "",
+        y = statistic,
+        ymin = conf.low,
+        ymax = conf.high
+    )) +
+    geom_pointrange() +
+    geom_point(size = 3) + 
+    labs(title = "Correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos")
 ```
 
