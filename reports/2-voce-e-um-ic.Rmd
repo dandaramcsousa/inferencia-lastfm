@@ -47,12 +47,58 @@ Utilizaremos ICs para estimar duas métricas sobre os usuários do LastFM em ger
 Crie intervalos com 95% de confiança.
 
 ### Proporção de novos artistas escutada por usuários
-
 ```{r}
 lastfm %>%
     ggplot(aes(news)) +
     geom_histogram(binwidth = 10)
 ```
+
+1. Bootstrap manual
+
+```{r}
+theta_prop <- function(df){
+    mean(
+        (df %>%
+        mutate(prop = news/(news + old)))$prop
+    )
+}
+theta_c <- theta_prop(lastfm)
+```
+
+```{r}
+repeticoes = 4000 
+
+um_bootstrap <- function(df){
+    prop = (df %>%
+        mutate(prop = news/(news + old)))$prop
+    boot_x <- sample(prop,           # amostre dos dados
+                   size = NROW(prop), # tamanho igual ao recebido
+                   replace = TRUE) # aqui é o bootstrap
+  return(mean(boot_x))
+}
+
+set.seed(1212)
+
+# A REAMOSTRAGEM
+reamostragens = tibble(i = 1:repeticoes) %>% 
+  mutate(theta_c_s = map_dbl(i, ~ um_bootstrap(lastfm)))
+
+reamostragens
+```
+
+```{r}
+intervalo = reamostragens %>% 
+  mutate(erro = theta_c_s - theta_c) %>% 
+  summarise(erro_i = quantile(erro, .05), 
+            erro_s = quantile(erro, .95))
+
+intervalo = intervalo %>% 
+  mutate(valor_i = theta_c + erro_i, 
+         valor_s = theta_c + erro_s)
+intervalo
+```
+
+2. Biblioteca boot
 
 ```{r}
 theta <- function(df,i) {
@@ -65,7 +111,7 @@ theta <- function(df,i) {
 
 booted <- boot(data = lastfm, 
                statistic = theta, 
-               R = 2000)
+               R = 4000)
 
 ci = tidy(booted, 
           conf.level = .95,
@@ -90,11 +136,64 @@ ci %>%
 
 ### Usuários que gostam muito de música pop
 
+
 ```{r}
 lastfm %>%
     ggplot(aes(mediana_pop)) +
     geom_histogram()
 ```
+
+
+1. Bootstrap manual
+
+```{r}
+theta_prop_pop <- function(df){
+    mean(
+        (df %>% filter (mediana_pop > 5) %>%
+        mutate(prop_pop = news/(news + old),
+               cor_pop = cor(mediana_pop, prop_pop)))
+        $cor_pop)
+}
+theta_c_pop <- theta_prop_pop(lastfm)
+```
+
+```{r}
+repeticoes_pop = 4000 
+
+um_bootstrap_pop <- function(df){
+    cor_pop = (df %>% filter (mediana_pop > 5) %>%
+        mutate(prop_pop = news/(news + old),
+               cor_pop = cor(mediana_pop, prop_pop)))$cor_pop
+    
+    boot_x <- sample(cor_pop,           # amostre dos dados
+                   size = NROW(cor_pop), # tamanho igual ao recebido
+                   replace = TRUE) # aqui é o bootstrap
+  return(mean(boot_x))
+}
+
+set.seed(1212)
+
+# A REAMOSTRAGEM
+reamostragens_pop = tibble(i = 1:repeticoes) %>% 
+  mutate(theta_c_s_pop = map_dbl(i, ~ um_bootstrap_pop(lastfm)))
+
+reamostragens_pop
+```
+
+```{r}
+intervalo_pop = reamostragens_pop %>% 
+  mutate(erro = theta_c_s_pop - theta_c_pop) %>% 
+  summarise(erro_i_pop = quantile(erro, .05), 
+            erro_s_pop = quantile(erro, .95))
+
+intervalo_pop = intervalo_pop %>% 
+  mutate(valor_i_pop = theta_c_pop + erro_i_pop, 
+         valor_s_pop = theta_c_pop + erro_s_pop)
+intervalo_pop
+```
+
+2. Biblioteca boot
+
 
 ```{r}
 theta_pop <- function(df,i) {
