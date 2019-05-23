@@ -47,6 +47,9 @@ Utilizaremos ICs para estimar duas métricas sobre os usuários do LastFM em ger
 Crie intervalos com 95% de confiança.
 
 ### Proporção de novos artistas escutada por usuários
+
+Primeiro, vamos dar uma olhada no número de artistas novos escutados pelos usuários. Mas vale lembrar que apenas isso não nos dá nossa resposta. Para nossa amostra usaremos primeiramente uma técnica de reamostragem chamada bootstrap que será implementada e compararemos com a técnica de uma biblioteca do RStudio.
+
 ```{r}
 lastfm %>%
     ggplot(aes(news)) +
@@ -69,8 +72,7 @@ theta_c <- theta_prop(lastfm)
 repeticoes = 4000 
 
 um_bootstrap <- function(df){
-    prop = (df %>%
-        mutate(prop = news/(news + old)))$prop
+    prop <- (df %>% mutate(prop = news/(news + old)))$prop
     boot_x <- sample(prop,           # amostre dos dados
                    size = NROW(prop), # tamanho igual ao recebido
                    replace = TRUE) # aqui é o bootstrap
@@ -121,22 +123,15 @@ ci = tidy(booted,
 glimpse(ci)
 ```
 
-```{r}
-ci %>%
-    ggplot(aes(
-        x = "",
-        y = statistic,
-        ymin = conf.low,
-        ymax = conf.high
-    )) +
-    geom_pointrange() +
-    geom_point(size = 3) + 
-    labs(title = "Proporção de novos artistas")
-```
+*O que temos?*
+
+O theta da nossa implementação manual foi de `0.2423659` e pelo boot foi `0.242366`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de [0.2325,0.2524] e no segundo [0.2311,0.2546].
+Sendo assim, temos 95% de confiança de afirmar que a proporção é de `0.2423` para novos artistas escutados pelos usuários.
+
 
 ### Usuários que gostam muito de música pop
 
-
+Novamente, olhando um pouco do nosso dado:
 ```{r}
 lastfm %>%
     ggplot(aes(mediana_pop)) +
@@ -206,7 +201,7 @@ theta_pop <- function(df,i) {
 
 booted_pop <- boot(data = lastfm, 
                statistic = theta_pop, 
-               R = 2000)
+               R = 4000)
 
 ci_pop = tidy(booted_pop, 
           conf.level = .95,
@@ -216,16 +211,7 @@ ci_pop = tidy(booted_pop,
 glimpse(ci_pop)
 ```
 
-```{r}
-ci_pop %>%
-    ggplot(aes(
-        x = "",
-        y = statistic,
-        ymin = conf.low,
-        ymax = conf.high
-    )) +
-    geom_pointrange() +
-    geom_point(size = 3) + 
-    labs(title = "Correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos")
-```
+*O que temos?*
 
+O theta da nossa implementação manual foi de `-0.05679803` e pelo boot foi `-0.05679804`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de [-0.05679804,-0.05679804] e no segundo [ -0.1780128,0.06187242].
+Sendo assim, temos 95% de confiança de afirmar que a proporção é de `-0.05679804` para a correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos e podemos considerar uma correlação negativa fraca.
