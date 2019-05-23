@@ -123,10 +123,10 @@ ci = tidy(booted,
 glimpse(ci)
 ```
 
-*O que temos?*
+**O que temos?**
 
-O theta da nossa implementação manual foi de `0.2423659` e pelo boot foi `0.242366`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de [0.2325,0.2524] e no segundo [0.2311,0.2546].
-Sendo assim, temos 95% de confiança de afirmar que a proporção é de `0.2423` para novos artistas escutados pelos usuários.
+O theta da nossa implementação manual foi de `0.2423659` e pelo boot foi `0.242366`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de `[0.2325,0.2524]` e no segundo `[0.2311,0.2546]`.
+Sendo assim, temos **95%** de confiança de afirmar que a proporção é de `0.2423` para novos artistas escutados pelos usuários.
 
 
 ### Usuários que gostam muito de música pop
@@ -211,7 +211,7 @@ ci_pop = tidy(booted_pop,
 glimpse(ci_pop)
 ```
 
-*O que temos?*
+**O que temos?**
 
-O theta da nossa implementação manual foi de `-0.05679803` e pelo boot foi `-0.05679804`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de [-0.05679804,-0.05679804] e no segundo [ -0.1780128,0.06187242].
-Sendo assim, temos 95% de confiança de afirmar que a proporção é de `-0.05679804` para a correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos e podemos considerar uma correlação negativa fraca.
+O theta da nossa implementação manual foi de `-0.05679803` e pelo boot foi `-0.05679804`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de `[-0.05679804,-0.05679804]` e no segundo `[-0.1780128,0.06187242]`.
+Sendo assim, temos **95%** de confiança de afirmar que a proporção é de `-0.05679804` para a correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos e podemos considerar uma correlação negativa fraca.
