@@ -222,8 +222,21 @@ glimpse(ci_pop)
 
 **O que temos?**
 
-O theta da nossa implementação manual foi de `-0.05679803` e pelo boot foi `-0.05679804`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de `[-0.05679804,-0.05679804]` e no segundo `[-0.1780128,0.06187242]`.
-Sendo assim, temos **95%** de confiança de afirmar que a proporção é de `-0.05679804` para a correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos e podemos considerar uma correlação negativa fraca.
+O theta da nossa implementação manual foi de `-0.05679803` e pelo boot foi `-0.05679804`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de `[-0.05679804,-0.05679804]` e no segundo `[-0.1780128,0.06187242]`. Além disso, abaixo vemos que para nossa amostra a correção em Pearson, Spearman e Kendall são muito baixas, o que reafirma nossa teoria.
+
+Sendo assim, temos **95%** de confiança de afirmar que a correlação é de `-0.05679804` entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos e podemos considerar uma correlação negativa fraca.
+
+
+```{r}
+lastfm %>%
+    filter(mediana_pop > 5) %>%
+    mutate(proporcao = news/(news + old)) %>%
+    summarise(
+        Pearson = cor(mediana_pop, proporcao, method = "pearson"),
+        Spearman = cor(mediana_pop, proporcao, method = "spearman"),
+        Kendall = cor(mediana_pop, proporcao, method = "kendall")
+    ) 
+```
 
 ```{r}
 ic.comparacao_pop <- data.frame("metodo" = c("Bootstrap Manual", "Boot"), "theta" = c(theta_c_pop, ci_pop$statistic), "conf.low" = c(intervalo_pop$valor_i , ci_pop$conf.low), "conf.high" = c(intervalo_pop$valor_s, ci_pop$conf.high))
