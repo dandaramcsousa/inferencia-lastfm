@@ -128,6 +128,15 @@ glimpse(ci)
 O theta da nossa implementação manual foi de `0.2423659` e pelo boot foi `0.242366`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de `[0.2325,0.2524]` e no segundo `[0.2311,0.2546]`.
 Sendo assim, temos **95%** de confiança de afirmar que a proporção é de `0.2423` para novos artistas escutados pelos usuários.
 
+```{r}
+ic.comparacao <- data.frame("metodo" = c("Bootstrap Manual", "Boot"), "theta" = c(theta_c, ci$statistic), "conf.low" = c(intervalo$valor_i , ci$conf.low), "conf.high" = c(intervalo$valor_s, ci$conf.high))
+
+ic.comparacao %>%
+    ggplot(aes(x = metodo, y = theta, ymin = conf.low, ymax = conf.high )) +
+    geom_pointrange(alpha = .8, size = .3) +
+    labs(x = "Método", y = "Theta")
+```
+
 
 ### Usuários que gostam muito de música pop
 
@@ -178,12 +187,12 @@ reamostragens_pop
 ```{r}
 intervalo_pop = reamostragens_pop %>% 
   mutate(erro = theta_c_s_pop - theta_c_pop) %>% 
-  summarise(erro_i_pop = quantile(erro, .05), 
-            erro_s_pop = quantile(erro, .95))
+  summarise(erro_i = quantile(erro, .05), 
+            erro_s = quantile(erro, .95))
 
 intervalo_pop = intervalo_pop %>% 
-  mutate(valor_i_pop = theta_c_pop + erro_i_pop, 
-         valor_s_pop = theta_c_pop + erro_s_pop)
+  mutate(valor_i = theta_c_pop + erro_i, 
+         valor_s = theta_c_pop + erro_s)
 intervalo_pop
 ```
 
@@ -215,3 +224,12 @@ glimpse(ci_pop)
 
 O theta da nossa implementação manual foi de `-0.05679803` e pelo boot foi `-0.05679804`. O que podemos considerar iguais dado que há aproximações e arredondamentos. O intervalo de confiança no primeiro modo foi de `[-0.05679804,-0.05679804]` e no segundo `[-0.1780128,0.06187242]`.
 Sendo assim, temos **95%** de confiança de afirmar que a proporção é de `-0.05679804` para a correlação entre a popularidade mediana dos artistas escutado e a proporção dos artistas escutados que eram novos e podemos considerar uma correlação negativa fraca.
+
+```{r}
+ic.comparacao_pop <- data.frame("metodo" = c("Bootstrap Manual", "Boot"), "theta" = c(theta_c_pop, ci_pop$statistic), "conf.low" = c(intervalo_pop$valor_i , ci_pop$conf.low), "conf.high" = c(intervalo_pop$valor_s, ci_pop$conf.high))
+
+ic.comparacao_pop %>%
+    ggplot(aes(x = metodo, y = theta, ymin = conf.low, ymax = conf.high )) +
+    geom_pointrange(alpha = .8, size = .3) +
+    labs(x = "Método", y = "Theta")
+```
